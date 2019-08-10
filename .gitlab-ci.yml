@@ -1,0 +1,21 @@
+image: golang:latest
+
+build:
+    stage: build
+    variables:
+      CI_A_PROJ: "byte-pattern-patcher"
+      CI_A_DIR: "$CI_A_PROJ-$CI_COMMIT_SHORT_SHA-build"
+    script:
+      - mkdir "$CI_A_DIR"
+      
+      - GOOS=linux GOARCH=386 go build -ldflags "-s -w" -o "$CI_A_DIR/$CI_A_PROJ-386"
+      - GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o "$CI_A_DIR/$CI_A_PROJ-amd64"
+      - GOOS=linux GOARCH=arm go build -ldflags "-s -w" -o "$CI_A_DIR/$CI_A_PROJ-arm"
+      - GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -o "$CI_A_DIR/$CI_A_PROJ-arm64"
+
+      - GOOS=windows GOARCH=386 go build -ldflags "-s -w" -o "$CI_A_DIR/$CI_A_PROJ-386.exe"
+      - GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -o "$CI_A_DIR/$CI_A_PROJ-amd64.exe"
+    artifacts:
+      name: "$CI_A_DIR"
+      paths:
+        - "$CI_A_DIR/"
