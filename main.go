@@ -32,7 +32,7 @@ func backupFile(file *os.File) error {
 }
 
 func main() {
-	patchFileName := flag.String("p", "", "Patch definition")
+	patchFileName := flag.String("p", "", "Patch definition file")
 	targetFileName := flag.String("t", "", "Target file")
 	flag.Parse()
 
