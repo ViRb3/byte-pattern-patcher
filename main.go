@@ -74,7 +74,7 @@ func main() {
 				if pattern.Label == "" {
 					pattern.Label = "unlabeled"
 				}
-				fmt.Printf("Replaced %d occurances of %s\n", replaced, pattern.Label)
+				fmt.Printf("Replaced %d occurrences of %s\n", replaced, pattern.Label)
 				replacedAll += replaced
 			}
 		}
