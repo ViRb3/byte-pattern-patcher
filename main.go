@@ -67,19 +67,19 @@ func main() {
 			log.Fatal(err)
 		}
 
-		replacedAll := 0
+		replacedBuffer := 0
 		for _, pattern := range patchData.Patches {
-			replaced := processPattern(pattern, data, n)
-			if replaced > 0 {
+			replacedPattern := processPattern(pattern, data, n)
+			if replacedPattern > 0 {
 				if pattern.Label == "" {
 					pattern.Label = "unlabeled"
 				}
-				fmt.Printf("Replaced %d occurrences of %s\n", replaced, pattern.Label)
-				replacedAll += replaced
+				fmt.Printf("Replaced %d occurrences of %s\n", replacedPattern, pattern.Label)
+				replacedBuffer += replacedPattern
 			}
 		}
 
-		if replacedAll > 0 {
+		if replacedBuffer > 0 {
 			targetFile.Seek(-int64(n), os.SEEK_CUR)
 			nn, err := targetFile.Write(data[:n])
 			if n != nn {
