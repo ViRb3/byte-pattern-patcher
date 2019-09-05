@@ -58,6 +58,7 @@ func main() {
 
 	bufferSize := 4096
 	data := make([]byte, bufferSize)
+	replacedFile := 0
 	for {
 		n, err := targetFile.Read(data)
 		if err != nil {
@@ -76,6 +77,7 @@ func main() {
 				}
 				fmt.Printf("Replaced %d occurrences of %s\n", replacedPattern, pattern.Label)
 				replacedBuffer += replacedPattern
+				replacedFile += replacedPattern
 			}
 		}
 
@@ -103,4 +105,5 @@ func main() {
 	}
 
 	fmt.Println("Done!")
+	fmt.Printf("Replaced %d occurrences in total\n", replacedFile)
 }
