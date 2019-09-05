@@ -106,4 +106,8 @@ func main() {
 
 	fmt.Println("Done!")
 	fmt.Printf("Replaced %d occurrences in total\n", replacedFile)
+
+	if replacedFile < 1 {
+		os.Exit(2)
+	}
 }
