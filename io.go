@@ -13,7 +13,7 @@ func readPatches(patchFile string) (PatchData, error) {
 		return PatchData{}, err
 	}
 
-	result := []PatchDef{}
+	var result []PatchDef
 	if err := json.Unmarshal(bytes, &result); err != nil {
 		return PatchData{}, err
 	}
@@ -69,7 +69,7 @@ func stringToByteArray(pattern string) ([]byte, []bool, error) {
 			if err != nil {
 				return nil, nil, err
 			}
-			result[i] = byte(parsed[0])
+			result[i] = parsed[0]
 		}
 	}
 

@@ -27,7 +27,9 @@ func backupFile(file *os.File) error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	file.Seek(0, os.SEEK_SET)
+	if _, err := file.Seek(0, io.SeekStart); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -82,7 +84,9 @@ func main() {
 		}
 
 		if replacedBuffer > 0 {
-			targetFile.Seek(-int64(n), os.SEEK_CUR)
+			if _, err := targetFile.Seek(-int64(n), io.SeekCurrent); err != nil {
+				log.Fatal(err)
+			}
 			nn, err := targetFile.Write(data[:n])
 			if n != nn {
 				log.Fatalf("Buffer size mismatch: %d vs %d", n, nn)
@@ -98,7 +102,7 @@ func main() {
 		}
 
 		// make sure we don't miss a pattern split between two buffers
-		_, err = targetFile.Seek(-int64(patchData.LongestLen)-1, os.SEEK_CUR)
+		_, err = targetFile.Seek(-int64(patchData.LongestLen)-1, io.SeekCurrent)
 		if err != nil {
 			log.Fatal(err)
 		}
