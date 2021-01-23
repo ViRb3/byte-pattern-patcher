@@ -72,7 +72,7 @@ func main() {
 
 		replacedBuffer := 0
 		for _, pattern := range patchData.Patches {
-			replacedPattern := processPattern(pattern, data, n)
+			replacedPattern := processPattern(pattern, data[:n])
 			if replacedPattern > 0 {
 				if pattern.Label == "" {
 					pattern.Label = "unlabeled"

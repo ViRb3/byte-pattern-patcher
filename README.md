@@ -3,6 +3,7 @@ A minimalistic, performant, cross-platform byte pattern patcher
 
 ## Features
 * Wildcard support
+* Quantifier support
 * JSON patch definitions
 * Backup
 * Buffer processing

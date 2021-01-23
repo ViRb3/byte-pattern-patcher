@@ -18,3 +18,20 @@ type Patch struct {
 	Patched           []byte
 	PatchedWildcards  []bool
 }
+
+type ParsedString struct {
+	Pattern    []byte
+	Wildcards  []bool
+	Qualifiers []Quantifier
+}
+
+type Quantifier struct {
+	Index int
+	Min   int
+	Max   int
+}
+
+type QuantifierEx struct {
+	Index  int
+	Length int
+}

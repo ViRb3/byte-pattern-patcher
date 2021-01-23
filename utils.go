@@ -12,12 +12,12 @@ func replacePattern(pattern Patch, array []byte, pos int) {
 	}
 }
 
-func processPattern(pattern Patch, array []byte, length int) int {
+func processPattern(pattern Patch, array []byte) int {
 	replaced := 0
 	patternI := 0
 	patternLen := len(pattern.Original)
 
-	for i := 0; i < length; i++ {
+	for i := 0; i < len(array); i++ {
 
 		if pattern.OriginalWildcards[patternI] || pattern.Original[patternI] == array[i] {
 			patternI++

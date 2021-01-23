@@ -1,7 +1,7 @@
 [
     {
         "label": "Example",
-        "original": "e8 ?? aa",
-        "replaced": "?? ff ff"
+        "original": "01 ??{1,2} 02{1,2}",
+        "replaced": "?? ??{1,2} 03{1,2}"
     }
 ]
