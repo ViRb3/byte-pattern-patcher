@@ -1,4 +1,5 @@
 kind: pipeline
+type: docker
 name: build
 
 platform:
@@ -6,33 +7,53 @@ platform:
   arch: amd64
 
 steps:
-- name: test
-  image: golang:1.13.0-buster
-  commands:
-  - go vet || echo "Potential problems detected"
-  - go test -race
+  - name: test
+    image: golang:1.15
+    volumes:
+      - name: deps
+        path: /go
+    commands:
+      - go test -race -v ./... -cover
+    when:
+      event:
+        exclude:
+          - tag
 
-- name: build
-  image: golang:1.13.0-buster
-  commands:
-  - ln -s $PWD /build
-  - cd /build
-  - go mod download
-  - mkdir release
-  - GOOS=linux GOARCH=386 go build -ldflags "-s -w" -o "release/$DRONE_REPO_NAME-386" &
-  - GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o "release/$DRONE_REPO_NAME-amd64" &
-  - GOOS=linux GOARCH=arm go build -ldflags "-s -w" -o "release/$DRONE_REPO_NAME-arm" &
-  - GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -o "release/$DRONE_REPO_NAME-arm64" &
-  - GOOS=windows GOARCH=386 go build -ldflags "-s -w" -o "release/$DRONE_REPO_NAME-386.exe" &
-  - GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -o "release/$DRONE_REPO_NAME-amd64.exe" &
-  - wait
+  - name: version
+    image: node:14.8
+    commands:
+      - yarn global add semantic-release@17.1
+      - semantic-release
 
-- name: publish
-  image: plugins/github-release
-  when:
-    event:
-      - tag
-  settings:
-    api_key:
-      from_secret: github_token
-    files: "release/*"
+    environment:
+      GITHUB_TOKEN:
+        from_secret: github_token
+    when:
+      event:
+        exclude:
+          - tag
+
+  - name: fetch
+    image: alpine/git
+    commands:
+      - git fetch --tags
+    when:
+      event: tag
+
+  - name: release
+    image: golang:1.15
+    environment:
+      GITHUB_TOKEN:
+        from_secret: github_token
+    volumes:
+      - name: deps
+        path: /go
+    commands:
+      - curl -sL https://github.com/goreleaser/goreleaser/releases/download/v0.142.0/goreleaser_Linux_x86_64.tar.gz | tar xzf - -C /tmp
+      - /tmp/goreleaser -f "$PWD/.goreleaser.yml"
+    when:
+      event: tag
+
+volumes:
+  - name: deps
+    temp: { }
