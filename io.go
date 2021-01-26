@@ -56,6 +56,9 @@ func parsePatches(patches []PatchDef) (PatchData, error) {
 	result := PatchData{}
 
 	for _, patch := range patches {
+		if patch.Disabled {
+			continue
+		}
 		original, err := parseString(patch.Original)
 		if err != nil {
 			return PatchData{}, err

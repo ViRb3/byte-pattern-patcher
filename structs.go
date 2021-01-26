@@ -2,6 +2,7 @@ package main
 
 type PatchDef struct {
 	Label    string `json:"label,omitempty"`
+	Disabled bool   `json:"disabled,omitempty"`
 	Original string `json:"original"`
 	Patched  string `json:"replaced"`
 }
