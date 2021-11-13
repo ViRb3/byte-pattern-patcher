@@ -1,4 +1,4 @@
-module byte-pattern-patcher
+module github.com/ViRb3/byte-pattern-patcher
 
 go 1.12
 
