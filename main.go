@@ -19,13 +19,13 @@ func backupFile(file *os.File) error {
 
 	backupFile, err := os.OpenFile(backupFileName, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer backupFile.Close()
 
 	_, err = io.Copy(backupFile, file)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	if _, err := file.Seek(0, io.SeekStart); err != nil {
 		return err
@@ -36,6 +36,7 @@ func backupFile(file *os.File) error {
 func main() {
 	patchFileName := flag.String("p", "", "Patch definition file")
 	targetFileName := flag.String("t", "", "Target file")
+	backup := flag.Bool("b", true, "Backup original file")
 	flag.Parse()
 
 	if *patchFileName == "" || *targetFileName == "" {
@@ -54,8 +55,10 @@ func main() {
 	}
 	defer targetFile.Close()
 
-	if err := backupFile(targetFile); err != nil {
-		log.Fatal(err)
+	if *backup {
+		if err := backupFile(targetFile); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	bufferSize := 4096
