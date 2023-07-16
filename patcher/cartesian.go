@@ -1,10 +1,10 @@
-package main
+package patcher
 
 // Based on https://github.com/schwarmco/go-cartesian-product
 // but single-threaded with reproducible output
 
 // Iter takes interface-slices and returns a channel, receiving cartesian products
-func Iter(params ...[]interface{}) chan []interface{} {
+func iter(params ...[]interface{}) chan []interface{} {
 	c := make(chan []interface{})
 	go func() {
 		iterate(c, []interface{}{}, params...)

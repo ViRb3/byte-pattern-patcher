@@ -1,4 +1,4 @@
-package main
+package patcher
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -7,7 +7,7 @@ import (
 
 func TestOffset(t *testing.T) {
 	input := []byte{0x00, 0xAA, 0x00}
-	replaced := processPattern(
+	replaced := applyPatch(
 		Patch{
 			Original:          []byte{0xAA},
 			OriginalWildcards: []bool{false},
@@ -21,7 +21,7 @@ func TestOffset(t *testing.T) {
 
 func TestSequentialRepeating(t *testing.T) {
 	input := []byte{0xEB, 0xEB, 0xAA}
-	replaced := processPattern(
+	replaced := applyPatch(
 		Patch{
 			Original:          []byte{0xEB, 0xAA},
 			OriginalWildcards: []bool{false, false},
@@ -35,7 +35,7 @@ func TestSequentialRepeating(t *testing.T) {
 
 func TestOriginalWildcard(t *testing.T) {
 	input := []byte{0xEB, 0xEB, 0xAA}
-	replaced := processPattern(
+	replaced := applyPatch(
 		Patch{
 			Original:          []byte{0xEB, 0x00},
 			OriginalWildcards: []bool{false, true},
@@ -49,7 +49,7 @@ func TestOriginalWildcard(t *testing.T) {
 
 func TestPatchWildcard(t *testing.T) {
 	input := []byte{0xEB, 0xEB, 0xAA}
-	replaced := processPattern(
+	replaced := applyPatch(
 		Patch{
 			Original:          []byte{0xEB, 0x00},
 			OriginalWildcards: []bool{false, true},
@@ -63,7 +63,7 @@ func TestPatchWildcard(t *testing.T) {
 
 func TestTooLargePatch(t *testing.T) {
 	input := []byte{0xEB, 0xEB, 0xAA}
-	replaced := processPattern(
+	replaced := applyPatch(
 		Patch{
 			Original:          []byte{0xEB, 0xEB},
 			OriginalWildcards: []bool{false, false},

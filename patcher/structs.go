@@ -1,15 +1,10 @@
-package main
+package patcher
 
-type PatchDef struct {
+type patchDef struct {
 	Label    string `json:"label,omitempty"`
 	Disabled bool   `json:"disabled,omitempty"`
 	Original string `json:"original"`
 	Patched  string `json:"replaced"`
-}
-
-type PatchData struct {
-	Patches    []Patch
-	LongestLen int
 }
 
 type Patch struct {
@@ -20,19 +15,19 @@ type Patch struct {
 	PatchedWildcards  []bool
 }
 
-type ParsedString struct {
+type parsedString struct {
 	Pattern    []byte
 	Wildcards  []bool
-	Qualifiers []Quantifier
+	Qualifiers []quantifier
 }
 
-type Quantifier struct {
+type quantifier struct {
 	Index int
 	Min   int
 	Max   int
 }
 
-type QuantifierEx struct {
+type quantifierEx struct {
 	Index  int
 	Length int
 }

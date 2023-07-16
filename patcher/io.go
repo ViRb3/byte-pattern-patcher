@@ -1,30 +1,30 @@
-package main
+package patcher
 
 import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"regexp"
 	"sort"
 	"strconv"
 )
 
-func readPatches(patchFile string) (PatchData, error) {
-	bytes, err := ioutil.ReadFile(patchFile)
+func ReadPatches(patchFile string) ([]Patch, error) {
+	bytes, err := os.ReadFile(patchFile)
 	if err != nil {
-		return PatchData{}, err
+		return nil, errors.New("read error: " + err.Error())
 	}
 
-	var result []PatchDef
+	var result []patchDef
 	if err := json.Unmarshal(bytes, &result); err != nil {
-		return PatchData{}, err
+		return nil, errors.New("unmarshal error: " + err.Error())
 	}
 
 	parsedResult, err := parsePatches(result)
 	if err != nil {
-		return PatchData{}, err
+		return nil, errors.New("parse error: " + err.Error())
 	}
 	return parsedResult, nil
 }
@@ -52,8 +52,8 @@ func expandQuantifiersWildcard(pattern *[]bool, startI int, qLen int) {
 	*pattern = newPattern
 }
 
-func parsePatches(patches []PatchDef) (PatchData, error) {
-	result := PatchData{}
+func parsePatches(patches []patchDef) ([]Patch, error) {
+	var result []Patch
 
 	for _, patch := range patches {
 		if patch.Disabled {
@@ -61,33 +61,33 @@ func parsePatches(patches []PatchDef) (PatchData, error) {
 		}
 		original, err := parseString(patch.Original)
 		if err != nil {
-			return PatchData{}, err
+			return nil, err
 		}
 		patched, err := parseString(patch.Patched)
 		if err != nil {
-			return PatchData{}, err
+			return nil, err
 		}
 
 		if len(original.Qualifiers) != len(patched.Qualifiers) {
-			return PatchData{}, errors.New(fmt.Sprintf("original quantifier len %d != patched quantifier len %d",
+			return nil, errors.New(fmt.Sprintf("original quantifier len %d != patched quantifier len %d",
 				len(original.Qualifiers), len(patched.Qualifiers)))
 		}
 		for i, q1 := range original.Qualifiers {
 			q2 := patched.Qualifiers[i]
 			if q1.Index != q2.Index {
-				return PatchData{}, errors.New(fmt.Sprintf("quantifier %d has mismatching index: %d and %d", i, q1.Index, q2.Index))
+				return nil, errors.New(fmt.Sprintf("quantifier %d has mismatching index: %d and %d", i, q1.Index, q2.Index))
 			}
 			if q1.Min != q2.Min {
-				return PatchData{}, errors.New(fmt.Sprintf("quantifier %d has mismatching mins: %d and %d", i, q1.Min, q2.Min))
+				return nil, errors.New(fmt.Sprintf("quantifier %d has mismatching mins: %d and %d", i, q1.Min, q2.Min))
 			}
 			if q1.Max != q2.Max {
-				return PatchData{}, errors.New(fmt.Sprintf("quantifier %d has mismatching maxes: %d and %d", i, q1.Max, q2.Max))
+				return nil, errors.New(fmt.Sprintf("quantifier %d has mismatching maxes: %d and %d", i, q1.Max, q2.Max))
 			}
 			if q1.Min < 1 {
-				return PatchData{}, errors.New(fmt.Sprintf("quantifier %d has min < 1: %d", i, q1.Min))
+				return nil, errors.New(fmt.Sprintf("quantifier %d has min < 1: %d", i, q1.Min))
 			}
 			if q1.Max < q1.Min {
-				return PatchData{}, errors.New(fmt.Sprintf("quantifier %d has max < min: %d < %d", i, q1.Max, q1.Min))
+				return nil, errors.New(fmt.Sprintf("quantifier %d has max < min: %d < %d", i, q1.Max, q1.Min))
 			}
 		}
 
@@ -95,12 +95,12 @@ func parsePatches(patches []PatchDef) (PatchData, error) {
 		for _, q := range original.Qualifiers {
 			var expandedQuantifier []interface{}
 			for qLen := q.Min; qLen <= q.Max; qLen++ {
-				expandedQuantifier = append(expandedQuantifier, QuantifierEx{q.Index, qLen})
+				expandedQuantifier = append(expandedQuantifier, quantifierEx{q.Index, qLen})
 			}
 			expandedQuantifiers = append(expandedQuantifiers, expandedQuantifier)
 		}
 
-		for quantifierSet := range Iter(expandedQuantifiers...) {
+		for quantifierSet := range iter(expandedQuantifiers...) {
 			originalPattern := original.Pattern
 			originalWildcards := original.Wildcards
 			patchedPattern := patched.Pattern
@@ -108,40 +108,32 @@ func parsePatches(patches []PatchDef) (PatchData, error) {
 
 			// sort quantifiers starting with last so that we don't affect other quantifiers when we start expanding
 			sort.Slice(quantifierSet, func(i, j int) bool {
-				return quantifierSet[i].(QuantifierEx).Index > quantifierSet[j].(QuantifierEx).Index
+				return quantifierSet[i].(quantifierEx).Index > quantifierSet[j].(quantifierEx).Index
 			})
 
 			for _, qInterface := range quantifierSet {
-				q := qInterface.(QuantifierEx)
+				q := qInterface.(quantifierEx)
 				expandQuantifiersPattern(&originalPattern, q.Index, q.Length)
 				expandQuantifiersWildcard(&originalWildcards, q.Index, q.Length)
 				expandQuantifiersPattern(&patchedPattern, q.Index, q.Length)
 				expandQuantifiersWildcard(&patchedWildcards, q.Index, q.Length)
 			}
 
-			result.Patches = append(result.Patches, Patch{
+			result = append(result, Patch{
 				Label:             patch.Label,
 				Original:          originalPattern,
 				OriginalWildcards: originalWildcards,
 				Patched:           patchedPattern,
 				PatchedWildcards:  patchedWildcards})
-
-			longestLen := len(original.Pattern)
-			for _, q := range original.Qualifiers {
-				longestLen += q.Max - 1
-			}
-			if longestLen > result.LongestLen {
-				result.LongestLen = longestLen
-			}
 		}
 	}
 
 	return result, nil
 }
 
-func parseString(pattern string) (ParsedString, error) {
+func parseString(pattern string) (parsedString, error) {
 	elements := separatePattern.Split(pattern, -1)
-	result := ParsedString{
+	result := parsedString{
 		Pattern:   make([]byte, len(elements)),
 		Wildcards: make([]bool, len(elements)),
 	}
@@ -152,13 +144,13 @@ func parseString(pattern string) (ParsedString, error) {
 			// element with quantifier
 			min, err := strconv.ParseInt(matches[2], 10, 64)
 			if err != nil {
-				return ParsedString{}, err
+				return parsedString{}, err
 			}
 			max, err := strconv.ParseInt(matches[3], 10, 64)
 			if err != nil {
-				return ParsedString{}, err
+				return parsedString{}, err
 			}
-			result.Qualifiers = append(result.Qualifiers, Quantifier{
+			result.Qualifiers = append(result.Qualifiers, quantifier{
 				Index: i,
 				Min:   int(min),
 				Max:   int(max),
@@ -172,7 +164,7 @@ func parseString(pattern string) (ParsedString, error) {
 		} else {
 			parsed, err := hex.DecodeString(element)
 			if err != nil {
-				return ParsedString{}, err
+				return parsedString{}, err
 			}
 			result.Pattern[i] = parsed[0]
 		}
