@@ -85,6 +85,10 @@ func Process(targetFileName string, backup bool, patches []Patch) (map[string]in
 		}
 	}
 
+	return ProcessMem(targetFile, patches)
+}
+
+func ProcessMem(targetFile io.ReadWriteSeeker, patches []Patch) (map[string]int, error) {
 	longestLen := 0
 	for _, patch := range patches {
 		if len(patch.Original) > longestLen {

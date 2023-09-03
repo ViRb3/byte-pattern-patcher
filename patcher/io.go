@@ -17,12 +17,12 @@ func ReadPatches(patchFile string) ([]Patch, error) {
 		return nil, errors.New("read error: " + err.Error())
 	}
 
-	var result []patchDef
+	var result []PatchDef
 	if err := json.Unmarshal(bytes, &result); err != nil {
 		return nil, errors.New("unmarshal error: " + err.Error())
 	}
 
-	parsedResult, err := parsePatches(result)
+	parsedResult, err := ParsePatchDefs(result)
 	if err != nil {
 		return nil, errors.New("parse error: " + err.Error())
 	}
@@ -52,7 +52,7 @@ func expandQuantifiersWildcard(pattern *[]bool, startI int, qLen int) {
 	*pattern = newPattern
 }
 
-func parsePatches(patches []patchDef) ([]Patch, error) {
+func ParsePatchDefs(patches []PatchDef) ([]Patch, error) {
 	var result []Patch
 
 	for _, patch := range patches {

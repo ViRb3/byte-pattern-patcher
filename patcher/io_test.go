@@ -6,7 +6,7 @@ import (
 )
 
 func TestQuantifiers(t *testing.T) {
-	patches, err := parsePatches([]patchDef{{
+	patches, err := ParsePatchDefs([]PatchDef{{
 		Label:    "test",
 		Original: "01 ??{1,2} 02{1,2}",
 		Patched:  "?? ??{1,2} 03{1,2}",

@@ -1,6 +1,6 @@
 package patcher
 
-type patchDef struct {
+type PatchDef struct {
 	Label    string `json:"label,omitempty"`
 	Disabled bool   `json:"disabled,omitempty"`
 	Original string `json:"original"`
