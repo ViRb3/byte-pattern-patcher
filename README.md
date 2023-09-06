@@ -5,8 +5,9 @@ A minimalistic, performant, cross-platform byte pattern patcher
 * Wildcard support
 * Quantifier support
 * JSON patch definitions
-* Backup
 * Buffer processing
+* In-memory patching support
+* Library interface
 
 ## Usage
 Run the program without parameters or with `-help`
