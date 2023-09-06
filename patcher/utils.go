@@ -47,48 +47,7 @@ func applyPatch(patch Patch, array []byte) int {
 	return replaced
 }
 
-func backupFile(file *os.File) error {
-	backupFileName := file.Name() + ".bak"
-	if _, err := os.Stat(backupFileName); err == nil {
-		// assume backup exists
-		return nil
-	} else if !os.IsNotExist(err) {
-		return err
-	}
-
-	backupFile, err := os.OpenFile(backupFileName, os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		return err
-	}
-	defer backupFile.Close()
-
-	_, err = io.Copy(backupFile, file)
-	if err != nil {
-		return err
-	}
-	if _, err := file.Seek(0, io.SeekStart); err != nil {
-		return err
-	}
-	return nil
-}
-
-func Process(targetFileName string, backup bool, patches []Patch) (map[string]int, error) {
-	targetFile, err := os.OpenFile(targetFileName, os.O_RDWR, 0644)
-	if err != nil {
-		return nil, errors.New("read error: " + err.Error())
-	}
-	defer targetFile.Close()
-
-	if backup {
-		if err := backupFile(targetFile); err != nil {
-			return nil, errors.New("backup error: " + err.Error())
-		}
-	}
-
-	return ProcessMem(targetFile, patches)
-}
-
-func ProcessMem(targetFile io.ReadWriteSeeker, patches []Patch) (map[string]int, error) {
+func Process(targetFile io.ReadWriteSeeker, patches []Patch) (map[string]int, error) {
 	longestLen := 0
 	for _, patch := range patches {
 		if len(patch.Original) > longestLen {
