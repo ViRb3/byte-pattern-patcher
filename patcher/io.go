@@ -63,17 +63,17 @@ func ParsePatchDefs(patches []PatchDef) ([]Patch, error) {
 		if err != nil {
 			return nil, err
 		}
-		patched, err := parseString(patch.Patched)
+		replaced, err := parseString(patch.Replaced)
 		if err != nil {
 			return nil, err
 		}
 
-		if len(original.Qualifiers) != len(patched.Qualifiers) {
-			return nil, errors.New(fmt.Sprintf("original quantifier len %d != patched quantifier len %d",
-				len(original.Qualifiers), len(patched.Qualifiers)))
+		if len(original.Qualifiers) != len(replaced.Qualifiers) {
+			return nil, errors.New(fmt.Sprintf("original quantifier len %d != replaced quantifier len %d",
+				len(original.Qualifiers), len(replaced.Qualifiers)))
 		}
 		for i, q1 := range original.Qualifiers {
-			q2 := patched.Qualifiers[i]
+			q2 := replaced.Qualifiers[i]
 			if q1.Index != q2.Index {
 				return nil, errors.New(fmt.Sprintf("quantifier %d has mismatching index: %d and %d", i, q1.Index, q2.Index))
 			}
@@ -103,8 +103,8 @@ func ParsePatchDefs(patches []PatchDef) ([]Patch, error) {
 		for quantifierSet := range iter(expandedQuantifiers...) {
 			originalPattern := original.Pattern
 			originalWildcards := original.Wildcards
-			patchedPattern := patched.Pattern
-			patchedWildcards := patched.Wildcards
+			replacedPattern := replaced.Pattern
+			replacedWildcards := replaced.Wildcards
 
 			// sort quantifiers starting with last so that we don't affect other quantifiers when we start expanding
 			sort.Slice(quantifierSet, func(i, j int) bool {
@@ -115,16 +115,16 @@ func ParsePatchDefs(patches []PatchDef) ([]Patch, error) {
 				q := qInterface.(quantifierEx)
 				expandQuantifiersPattern(&originalPattern, q.Index, q.Length)
 				expandQuantifiersWildcard(&originalWildcards, q.Index, q.Length)
-				expandQuantifiersPattern(&patchedPattern, q.Index, q.Length)
-				expandQuantifiersWildcard(&patchedWildcards, q.Index, q.Length)
+				expandQuantifiersPattern(&replacedPattern, q.Index, q.Length)
+				expandQuantifiersWildcard(&replacedWildcards, q.Index, q.Length)
 			}
 
 			result = append(result, Patch{
 				Label:             patch.Label,
 				Original:          originalPattern,
 				OriginalWildcards: originalWildcards,
-				Patched:           patchedPattern,
-				PatchedWildcards:  patchedWildcards})
+				Replaced:          replacedPattern,
+				ReplacedWildcards: replacedWildcards})
 		}
 	}
 

@@ -11,8 +11,8 @@ func TestOffset(t *testing.T) {
 		Patch{
 			Original:          []byte{0xAA},
 			OriginalWildcards: []bool{false},
-			Patched:           []byte{0xFF},
-			PatchedWildcards:  []bool{false}},
+			Replaced:          []byte{0xFF},
+			ReplacedWildcards: []bool{false}},
 		input)
 
 	assert.Equal(t, []byte{0x00, 0xFF, 0x00}, input)
@@ -25,8 +25,8 @@ func TestSequentialRepeating(t *testing.T) {
 		Patch{
 			Original:          []byte{0xEB, 0xAA},
 			OriginalWildcards: []bool{false, false},
-			Patched:           []byte{0xFF, 0xFF},
-			PatchedWildcards:  []bool{false, false}},
+			Replaced:          []byte{0xFF, 0xFF},
+			ReplacedWildcards: []bool{false, false}},
 		input)
 
 	assert.Equal(t, []byte{0xEB, 0xFF, 0xFF}, input)
@@ -39,8 +39,8 @@ func TestOriginalWildcard(t *testing.T) {
 		Patch{
 			Original:          []byte{0xEB, 0x00},
 			OriginalWildcards: []bool{false, true},
-			Patched:           []byte{0xFF, 0xFF},
-			PatchedWildcards:  []bool{false, false}},
+			Replaced:          []byte{0xFF, 0xFF},
+			ReplacedWildcards: []bool{false, false}},
 		input)
 
 	assert.Equal(t, []byte{0xFF, 0xFF, 0xAA}, input)
@@ -53,8 +53,8 @@ func TestPatchWildcard(t *testing.T) {
 		Patch{
 			Original:          []byte{0xEB, 0x00},
 			OriginalWildcards: []bool{false, true},
-			Patched:           []byte{0x00, 0xFF},
-			PatchedWildcards:  []bool{true, false}},
+			Replaced:          []byte{0x00, 0xFF},
+			ReplacedWildcards: []bool{true, false}},
 		input)
 
 	assert.Equal(t, []byte{0xEB, 0xFF, 0xAA}, input)
@@ -67,8 +67,8 @@ func TestTooLargePatch(t *testing.T) {
 		Patch{
 			Original:          []byte{0xEB, 0xEB},
 			OriginalWildcards: []bool{false, false},
-			Patched:           []byte{0x00, 0x11, 0x22, 0x33, 0x44, 0x55},
-			PatchedWildcards:  []bool{false, false, false, false, false, false}},
+			Replaced:          []byte{0x00, 0x11, 0x22, 0x33, 0x44, 0x55},
+			ReplacedWildcards: []bool{false, false, false, false, false, false}},
 		input)
 
 	assert.Equal(t, []byte{0x00, 0x11, 0x22}, input)

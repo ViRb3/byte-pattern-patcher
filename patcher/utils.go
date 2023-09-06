@@ -4,18 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 )
 
-func applyPatchAtPos(pattern Patch, array []byte, pos int) {
-	for i := 0; i < len(pattern.Patched); i++ {
+func applyPatchAtPos(patch Patch, array []byte, pos int) {
+	for i := 0; i < len(patch.Replaced); i++ {
 		if pos+i >= len(array) {
 			return
 		}
-		if pattern.PatchedWildcards[i] {
+		if patch.ReplacedWildcards[i] {
 			continue
 		}
-		array[pos+i] = pattern.Patched[i]
+		array[pos+i] = patch.Replaced[i]
 	}
 }
 

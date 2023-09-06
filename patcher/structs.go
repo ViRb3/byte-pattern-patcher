@@ -4,15 +4,15 @@ type PatchDef struct {
 	Label    string `json:"label,omitempty"`
 	Disabled bool   `json:"disabled,omitempty"`
 	Original string `json:"original"`
-	Patched  string `json:"replaced"`
+	Replaced string `json:"replaced"`
 }
 
 type Patch struct {
 	Label             string
 	Original          []byte
 	OriginalWildcards []bool
-	Patched           []byte
-	PatchedWildcards  []bool
+	Replaced          []byte
+	ReplacedWildcards []bool
 }
 
 type parsedString struct {
